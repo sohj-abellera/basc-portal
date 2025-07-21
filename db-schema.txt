@@ -1,0 +1,308 @@
+-- ✅ Ordered by dependency for correct creation
+
+-- (1) User Statuses
+CREATE TABLE 1user_statuses (
+  status_id   TINYINT UNSIGNED PRIMARY KEY,
+  status_name VARCHAR(30) UNIQUE
+);
+INSERT INTO 1user_statuses VALUES
+  (1,'active'), (2,'inactive'), (3,'suspended'), (4,'pending');
+
+-- (1) Users
+CREATE TABLE 1users (
+  user_id         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  employee_id     VARCHAR(20) UNIQUE NOT NULL,
+  first_name      VARCHAR(50) NOT NULL,
+  last_name       VARCHAR(50) NOT NULL,
+  email           VARCHAR(160) NULL,
+  email_verified_at DATETIME NULL,
+  phone           VARCHAR(20) NULL,
+  password_hash   VARCHAR(255) NOT NULL,
+  status_id       TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (status_id) REFERENCES 1user_statuses(status_id)
+);
+
+-- (1) Roles
+CREATE TABLE 1roles (
+  role_id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  role_name VARCHAR(30) UNIQUE
+);
+
+-- (1) User-Role Relationships
+CREATE TABLE 1user_roles (
+  user_id BIGINT UNSIGNED,
+  role_id TINYINT UNSIGNED,
+  PRIMARY KEY(user_id, role_id),
+  FOREIGN KEY (user_id) REFERENCES 1users(user_id),
+  FOREIGN KEY (role_id) REFERENCES 1roles(role_id)
+);
+
+-- (2) Login Logs
+CREATE TABLE 2user_logins (
+  login_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id  BIGINT UNSIGNED NOT NULL,
+  ip       VARCHAR(45) NULL,
+  user_agent VARCHAR(255) NULL,
+  logged_in_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES 1users(user_id)
+);
+
+-- (2) Online Status
+CREATE TABLE 2user_presence (
+  user_id    BIGINT UNSIGNED PRIMARY KEY,
+  is_online  BOOLEAN DEFAULT FALSE,
+  last_seen  DATETIME DEFAULT NULL,
+  FOREIGN KEY (user_id) REFERENCES 1users(user_id)
+);
+
+-- (2) Activity Logs
+CREATE TABLE 2user_activities (
+  activity_id     BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id         BIGINT UNSIGNED NOT NULL,
+  module          VARCHAR(50) NOT NULL,
+  action          VARCHAR(50) NOT NULL,
+  description     TEXT,
+  related_id      BIGINT UNSIGNED NULL,
+  ip              VARCHAR(45) NULL,
+  user_agent      VARCHAR(255) NULL,
+  performed_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES 1users(user_id)
+);
+
+-- (3) Locations
+CREATE TABLE 3locations (
+  location_id   BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name          VARCHAR(100) NOT NULL,
+  address       TEXT DEFAULT NULL,
+  created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- (3) Products
+CREATE TABLE 3products (
+  product_id     BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name           VARCHAR(100) NOT NULL,
+  description    TEXT DEFAULT NULL,
+  category       VARCHAR(50) DEFAULT NULL,
+  unit_price     DECIMAL(10,2) NOT NULL,
+  reorder_level  INT UNSIGNED DEFAULT 10,
+  status         ENUM('active', 'archived') DEFAULT 'active',
+  created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- (3) Product Stock by Location
+CREATE TABLE 3product_stock_by_location (
+  product_id   BIGINT UNSIGNED NOT NULL,
+  location_id  BIGINT UNSIGNED NOT NULL,
+  quantity     INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (product_id, location_id),
+  FOREIGN KEY (product_id) REFERENCES 3products(product_id),
+  FOREIGN KEY (location_id) REFERENCES 3locations(location_id)
+);
+
+-- (3) Inventory Movements
+CREATE TABLE 3inventory_movements (
+  movement_id    BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  product_id     BIGINT UNSIGNED NOT NULL,
+  user_id        BIGINT UNSIGNED NOT NULL,
+  movement_type  ENUM('in', 'out', 'adjust') NOT NULL,
+  quantity       INT NOT NULL,
+  remarks        TEXT DEFAULT NULL,
+  created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES 3products(product_id),
+  FOREIGN KEY (user_id) REFERENCES 1users(user_id)
+);
+
+-- (3) Reorder Requests
+CREATE TABLE 3reorder_requests (
+  request_id     BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  product_id     BIGINT UNSIGNED NOT NULL,
+  requested_by   BIGINT UNSIGNED NOT NULL,
+  quantity       INT UNSIGNED NOT NULL,
+  status         ENUM('pending', 'approved', 'rejected', 'fulfilled') DEFAULT 'pending',
+  created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES 3products(product_id),
+  FOREIGN KEY (requested_by) REFERENCES 1users(user_id)
+);
+
+-- (3) Product History
+CREATE TABLE 3product_history (
+  history_id     BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  product_id     BIGINT UNSIGNED NOT NULL,
+  changed_by     BIGINT UNSIGNED NOT NULL,
+  field_changed  VARCHAR(50),
+  old_value      TEXT,
+  new_value      TEXT,
+  changed_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES 3products(product_id),
+  FOREIGN KEY (changed_by) REFERENCES 1users(user_id)
+);
+
+-- (4) Sales Orders
+CREATE TABLE 4sales_orders (
+  order_id        BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  ordered_by      BIGINT UNSIGNED NOT NULL,
+  customer_name   VARCHAR(100) NOT NULL,
+  customer_contact VARCHAR(50) DEFAULT NULL,
+  total_amount    DECIMAL(10,2) NOT NULL,
+  discount_amount DECIMAL(10,2) DEFAULT 0.00,
+  payment_type    ENUM('cash', 'gcash', 'bank_transfer', 'credit') DEFAULT 'cash',
+  status          ENUM('pending', 'processing', 'completed', 'cancelled') DEFAULT 'pending',
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (ordered_by) REFERENCES 1users(user_id)
+);
+
+-- (4) Sales Order Items
+CREATE TABLE 4sales_order_items (
+  item_id       BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  order_id      BIGINT UNSIGNED NOT NULL,
+  product_id    BIGINT UNSIGNED NOT NULL,
+  quantity      INT UNSIGNED NOT NULL,
+  unit_price    DECIMAL(10,2) NOT NULL,
+  subtotal      DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (order_id) REFERENCES 4sales_orders(order_id),
+  FOREIGN KEY (product_id) REFERENCES 3products(product_id)
+);
+
+-- (4) Sales Daily Summary
+CREATE TABLE 4sales_daily_summary (
+  summary_id      BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  product_id      BIGINT UNSIGNED NOT NULL,
+  sales_date      DATE NOT NULL,
+  total_quantity  INT UNSIGNED NOT NULL DEFAULT 0,
+  total_sales     DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  FOREIGN KEY (product_id) REFERENCES 3products(product_id),
+  UNIQUE(product_id, sales_date)
+);
+
+-- (4) Sales Returns
+CREATE TABLE 4sales_returns (
+  return_id     BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  order_id      BIGINT UNSIGNED NOT NULL,
+  product_id    BIGINT UNSIGNED NOT NULL,
+  quantity      INT UNSIGNED NOT NULL,
+  reason        TEXT DEFAULT NULL,
+  returned_by   BIGINT UNSIGNED NOT NULL,
+  returned_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (order_id) REFERENCES 4sales_orders(order_id),
+  FOREIGN KEY (product_id) REFERENCES 3products(product_id),
+  FOREIGN KEY (returned_by) REFERENCES 1users(user_id)
+);
+
+-- (5) Suppliers
+CREATE TABLE 5suppliers (
+  supplier_id     BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name            VARCHAR(100) NOT NULL,
+  contact_person  VARCHAR(100) DEFAULT NULL,
+  phone           VARCHAR(50) DEFAULT NULL,
+  email           VARCHAR(100) DEFAULT NULL,
+  address         TEXT DEFAULT NULL,
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- (5) Product-Supplier Link
+CREATE TABLE 5product_suppliers (
+  product_id   BIGINT UNSIGNED NOT NULL,
+  supplier_id  BIGINT UNSIGNED NOT NULL,
+  preferred    BOOLEAN DEFAULT FALSE,
+  PRIMARY KEY (product_id, supplier_id),
+  FOREIGN KEY (product_id) REFERENCES 3products(product_id),
+  FOREIGN KEY (supplier_id) REFERENCES 5suppliers(supplier_id)
+);
+
+-- (6) Deliveries
+CREATE TABLE 6deliveries (
+  delivery_id     BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  order_id        BIGINT UNSIGNED NOT NULL,
+  delivered_by    BIGINT UNSIGNED NOT NULL,
+  delivery_date   DATE NOT NULL,
+  status          ENUM('pending', 'in_transit', 'delivered', 'failed') DEFAULT 'pending',
+  remarks         TEXT DEFAULT NULL,
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (order_id) REFERENCES 4sales_orders(order_id),
+  FOREIGN KEY (delivered_by) REFERENCES 1users(user_id)
+);
+
+-- (6) Delivery Items
+CREATE TABLE 6delivery_items (
+  delivery_item_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  delivery_id      BIGINT UNSIGNED NOT NULL,
+  product_id       BIGINT UNSIGNED NOT NULL,
+  quantity_delivered INT UNSIGNED NOT NULL,
+  FOREIGN KEY (delivery_id) REFERENCES 6deliveries(delivery_id),
+  FOREIGN KEY (product_id) REFERENCES 3products(product_id)
+);
+
+-- (6) Delivery Logs
+CREATE TABLE 6delivery_logs (
+  log_id       BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  delivery_id  BIGINT UNSIGNED NOT NULL,
+  status       ENUM('in_transit', 'delivered', 'failed') NOT NULL,
+  location     VARCHAR(255) DEFAULT NULL,
+  updated_by   BIGINT UNSIGNED NOT NULL,
+  logged_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (delivery_id) REFERENCES 6deliveries(delivery_id),
+  FOREIGN KEY (updated_by) REFERENCES 1users(user_id)
+);
+
+-- (7) Supplier Deliveries
+CREATE TABLE 7supplier_deliveries (
+  supplier_delivery_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  supplier_id   BIGINT UNSIGNED NOT NULL,
+  product_id    BIGINT UNSIGNED NOT NULL,
+  quantity      INT UNSIGNED NOT NULL,
+  delivery_date DATE NOT NULL,
+  status        ENUM('pending', 'shipped', 'received', 'cancelled') DEFAULT 'pending',
+  remarks       TEXT DEFAULT NULL,
+  received_by   BIGINT UNSIGNED NULL,
+  received_at   DATETIME DEFAULT NULL,
+  created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (supplier_id) REFERENCES 5suppliers(supplier_id),
+  FOREIGN KEY (product_id) REFERENCES 3products(product_id),
+  FOREIGN KEY (received_by) REFERENCES 1users(user_id)
+);
+
+-- (8) Purchase Orders
+CREATE TABLE 8purchase_orders (
+  po_id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  supplier_id    BIGINT UNSIGNED NOT NULL,
+  ordered_by     BIGINT UNSIGNED NOT NULL,
+  po_number      VARCHAR(50) UNIQUE NOT NULL,
+  total_amount   DECIMAL(12,2) NOT NULL,
+  status         ENUM('draft', 'sent', 'approved', 'received', 'cancelled') DEFAULT 'draft',
+  remarks        TEXT DEFAULT NULL,
+  created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (supplier_id) REFERENCES 5suppliers(supplier_id),
+  FOREIGN KEY (ordered_by) REFERENCES 1users(user_id)
+);
+
+-- (8) Purchase Order Items
+CREATE TABLE 8purchase_order_items (
+  po_item_id     BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  po_id          BIGINT UNSIGNED NOT NULL,
+  product_id     BIGINT UNSIGNED NOT NULL,
+  quantity       INT UNSIGNED NOT NULL,
+  unit_cost      DECIMAL(10,2) NOT NULL,
+  subtotal       DECIMAL(12,2) NOT NULL,
+  FOREIGN KEY (po_id) REFERENCES 8purchase_orders(po_id),
+  FOREIGN KEY (product_id) REFERENCES 3products(product_id)
+);
+
+-- (9) Notifications
+CREATE TABLE 9notifications (
+  notification_id  BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id          BIGINT UNSIGNED DEFAULT NULL,
+  role_id          TINYINT UNSIGNED DEFAULT NULL,
+  module           VARCHAR(50),
+  message          TEXT NOT NULL,
+  is_read          BOOLEAN DEFAULT FALSE,
+  created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES 1users(user_id),
+  FOREIGN KEY (role_id) REFERENCES 1roles(role_id)
+);
