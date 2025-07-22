@@ -3,7 +3,7 @@
 session_start();
 
 // ✅ Include DB connection
-require_once 'php/db_connection.php';
+require_once 'db/db_connection.php';
 
 // ✅ Check if user is already logged in
 if (isset($_SESSION['user_id'])) {
@@ -13,6 +13,6 @@ if (isset($_SESSION['user_id'])) {
 }
 
 // ✅ Not logged in — send to login page
-header("Location: login.php");
+header("Location: login-interface/login.php");
 exit;
 ?>
