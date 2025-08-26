@@ -1,0 +1,19 @@
+
+/* Bitcount Grid Single 
+"Bitcount Grid Single", system-ui*/
+@import url('https://fonts.googleapis.com/css2?family=Bitcount+Grid+Single:wght@100..900&display=swap');
+
+/* Montserrat 
+"Montserrat", sans-serif */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+
+/* Lexend 
+"Lexend", sans-serif */
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
+
+:root {
+  --main-text: "Lexend", sans-serif;
+  --sub-text: "Montserrat", sans-serif;
+  --extra: "Bitcount Grid Single", system-ui;
+}
