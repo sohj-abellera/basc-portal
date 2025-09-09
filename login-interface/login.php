@@ -18,8 +18,23 @@ include '../auth/login_handler.php';
 
 </head>
 <body>
-    <div class="login-page-wrapper">
-        <div class="left-contents">
+
+<div class="login-page-container">
+    <div class="login-bg-mobile"></div>
+        <div class="logo-wrapper mobile">
+            <div class="logo-container">
+                <div class="squares">
+                    <div class="square"></div>
+                    <div class="square"></div>
+                </div>
+                <div class="logo-text-container">
+                    <div class="logo-text"><span class="b">B</span>est</div>
+                    <div class="logo-subtext">Aluminum Sales Corp.</div>
+                </div>
+            </div>
+        </div>
+    <div class="login-page-grid">
+        <div class="item item-1">
             <div class="text">
                 <div class="logo-main-container">
                     <div class="logo-wrapper login">
@@ -42,8 +57,7 @@ include '../auth/login_handler.php';
                 <div class="sub-text">You're on the official personnel portal of Best Aluminum Sales Corps. Here, you can access tools tailored to your role. For questions or concerns, please reach out to your administrator. Thank you!</div>
             </div>
         </div>
-
-        <div class="right-contents">
+        <div class="item item-2">
             <div class="forms-container">
                 <form action="" method="POST" id="login-form">
                     <div class="title">BASC Personel Portal</div>
@@ -91,6 +105,7 @@ include '../auth/login_handler.php';
             </div>
         </div>
     </div>
+</div>
     
 </body>
 </html>

@@ -11,22 +11,71 @@
     box-sizing: border-box;
 }
 
-body{
-    background-color: var(--main-color);
-    height: 100vh;
+/* #endregion */
+
+.login-page-container {
+    position: relative;
 }
 
-.login-page-wrapper{
+/* #region login-bg-mobile*/
+.login-bg-mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
     height: 100vh;
-    display: flex;
-    justify-content: space-between;
+    width: 100%;
+    z-index: -2;
+
+    background-image: url('../../assets/uploads/login-leftpanel-pic.png');
+    background-size: cover;
+    background-position: center center;
+
+    display: none;
+}
+
+.login-bg-mobile::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(2, 39, 49, 0.945); 
+    z-index: -2; 
 }
 
 .logo-wrapper.mobile{
     display: none;
+    justify-content: center;
+    align-items: center;
+}
+/* #endregion */
+
+/* #region login page grid*/
+.login-page-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    grid-template-rows: auto; 
+    height: 100vh;
 }
 
-.left-contents{
+/* #region login page grid layout*/
+.item-1 {
+    grid-row: 1;
+    grid-column: 1;  
+}
+.item-2 {
+    grid-row: 1;
+    grid-column: 2;   
+}
+
+.item-1, 
+.item-2{
+    height: 100vh;
+}
+/* #endregion */
+
+/* #region Left contents */
+.item-1{
     position: relative;
     display: flex;
     flex-direction: column;
@@ -36,29 +85,15 @@ body{
     padding: 50px 80px;
     overflow: hidden;
 
-    background-image: url('../../assets/uploads/login-leftpanel-pic.jpeg');
+    background-image: url('../../assets/uploads/login-leftpanel-pic.png');
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    z-index: -2;
 }
 
-.left-contents > .text{
-  position: relative;
-  z-index: 2;
-}
-
-/* .bg-img {
-  position: absolute;
-  top: -170px;
-  left: -100px;
-  width: 1100px;   
-  height: auto;    
-  z-index: 0;
-  pointer-events: none; 
-} */
-
-.left-contents::before {
+.item-1::before {
   content: "";
   position: absolute;
   top: 0;
@@ -66,11 +101,16 @@ body{
   width: 100%;
   height: 100%;
   background-color: rgba(2, 39, 49, 0.945); 
-  z-index: 1; 
+  z-index: -1; 
 }
 
-.left-contents .text .header,
-.left-contents .text .sub-text{
+.item-1 > .text{
+  position: relative;
+  z-index: 2;
+}
+
+.item-1 .text .header,
+.item-1 .text .sub-text{
     font-family: var(--sub-text);
     background: linear-gradient(to top right, #b4b4b4, #ffffff);
     background-clip: text; /* Standard property */
@@ -79,11 +119,11 @@ body{
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Shadow effect */
 }
 
-.left-contents .text .sub-text{
+.item-1 .text .sub-text{
     margin-top: 20px;
 }
 
-.left-contents .text .header{
+.item-1 .text .header{
     display: inline-block;
     font-size: 2.5rem;
     line-height: 4.5rem;
@@ -92,29 +132,27 @@ body{
     flex-direction: column;
 }
 
-.left-contents .text .header :not(:last-child){
+.item-1 .text .header :not(:last-child){
     font-size: 5.5rem;
     line-height: 5.5rem;
 }
 
-.left-contents .text .header :last-child :not(:last-child){
+.item-1 .text .header :last-child :not(:last-child){
     font-size: 2.5rem;
     margin-right: 15px;
     letter-spacing: 1px;
     line-height: 4.5rem;
 }
 
-.right-contents{
+/* #endregion */
+
+.item-2{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     background-color: white; 
-    width: 450px;
-    height: auto;
-    padding: 60px 80px;
+    padding: 50px;
 }
 
-
-
-
+/* #endregion */
