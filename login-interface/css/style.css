@@ -11,7 +11,148 @@
     box-sizing: border-box;
 }
 
-body{
+/* #endregion */
+
+.login-page-container {
+    position: relative;
+}
+
+/* #region login-bg-mobile*/
+.login-bg-mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100%;
+    z-index: -2;
+
+    background-image: url('../../assets/uploads/login-leftpanel-pic.png');
+    background-size: cover;
+    background-position: center center;
+
+    display: none;
+}
+
+.login-bg-mobile::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(2, 39, 49, 0.945); 
+    z-index: -2; 
+}
+
+.logo-wrapper.mobile{
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+/* #endregion */
+
+/* #region login page grid*/
+.login-page-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    grid-template-rows: auto; 
     height: 100vh;
 }
 
+/* #region login page grid layout*/
+.item-1 {
+    grid-row: 1;
+    grid-column: 1;  
+}
+.item-2 {
+    grid-row: 1;
+    grid-column: 2;   
+}
+
+.item-1, 
+.item-2{
+    height: 100vh;
+}
+/* #endregion */
+
+/* #region Left contents */
+.item-1{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    flex: 1;
+    height: auto;
+    padding: 50px 80px;
+    overflow: hidden;
+
+    background-image: url('../../assets/uploads/login-leftpanel-pic.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    z-index: -2;
+}
+
+.item-1::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(2, 39, 49, 0.945); 
+  z-index: -1; 
+}
+
+.item-1 > .text{
+  position: relative;
+  z-index: 2;
+}
+
+.item-1 .text .header,
+.item-1 .text .sub-text{
+    font-family: var(--sub-text);
+    background: linear-gradient(to top right, #b4b4b4, #ffffff);
+    background-clip: text; /* Standard property */
+    -webkit-background-clip: text; /* WebKit-specific */
+    color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Shadow effect */
+}
+
+.item-1 .text .sub-text{
+    margin-top: 20px;
+}
+
+.item-1 .text .header{
+    display: inline-block;
+    font-size: 2.5rem;
+    line-height: 4.5rem;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-1 .text .header :not(:last-child){
+    font-size: 5.5rem;
+    line-height: 5.5rem;
+}
+
+.item-1 .text .header :last-child :not(:last-child){
+    font-size: 2.5rem;
+    margin-right: 15px;
+    letter-spacing: 1px;
+    line-height: 4.5rem;
+}
+
+/* #endregion */
+
+.item-2{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: white; 
+    padding: 50px;
+}
+
+/* #endregion */
